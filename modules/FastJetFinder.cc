@@ -289,6 +289,7 @@ void FastJetFinder::Init()
 
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
   fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
+  fConstArray = ExportArray(GetString("ConstArray", "constituents")); // output array that contains constituents of jets
 }
 
 //------------------------------------------------------------------------------
@@ -343,7 +344,7 @@ void FastJetFinder::Process()
   // loop over input objects
   fItInputArray->Reset();
   number = 0;
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate*>(fItInputArray->Next()))) // static_cast force the input to be <Candidate> type
   {
     momentum = candidate->Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
@@ -434,7 +435,7 @@ void FastJetFinder::Process()
     {
       if(itInputList->user_index() < 0) continue;
       constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));
-
+      
       deta = TMath::Abs(momentum.Eta() - constituent->Momentum.Eta());
       dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
       if(deta > detaMax) detaMax = deta;
@@ -448,6 +449,7 @@ void FastJetFinder::Process()
 
       charge += constituent->Charge;
 
+      fConstArray->Add(constituent);
       candidate->AddCandidate(constituent);
     }
 
